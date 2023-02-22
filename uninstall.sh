@@ -1,0 +1,11 @@
+helm uninstall redis-cart
+helm uninstall emailservice
+helm uninstall cart-service
+helm uninstall currency-service
+helm uninstall payment-service
+helm uninstall recommendation-service
+helm uninstall productcatalog-service
+helm uninstall shipping-service
+helm uninstall ad-service
+helm uninstall checkout-service
+helm uninstall frontend-service
