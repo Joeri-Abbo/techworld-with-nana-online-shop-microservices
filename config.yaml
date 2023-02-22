@@ -4,6 +4,7 @@ kind: Deployment
 metadata:
   name: emailservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: emailservice
@@ -20,6 +21,29 @@ spec:
           env:
             - name: PORT
               value: "8080"
+            - name: DISABLE_TRACING
+              value: "1"
+            - name: DISABLE_PROFILER
+              value: "1"
+            - name: DISABLE_DEBUGGER
+              value: "1"
+          livelinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 200m
+              memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
@@ -39,6 +63,7 @@ kind: Deployment
 metadata:
   name: recommendationservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: recommendationservice
@@ -55,8 +80,24 @@ spec:
           env:
             - name: PORT
               value: "8080"
+            - name: DISABLE_TRACING
+              value: "1"
+            - name: DISABLE_PROFILER
+              value: "1"
+            - name: DISABLE_DEBUGGER
+              value: "1"
             - name: PRODUCT_CATALOG_SERVICE_ADDR
               value: "productcatalogservice:3550"
+          livelinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
@@ -76,6 +117,7 @@ kind: Deployment
 metadata:
   name: productcatalogservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: productcatalogservice
@@ -92,6 +134,17 @@ spec:
           env:
             - name: PORT
               value: "3550"
+          livelinessProbe:
+            httpGet:
+              path: /health
+              port: 3550
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:3550" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
@@ -112,6 +165,7 @@ kind: Deployment
 metadata:
   name: paymentservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: paymentservice
@@ -128,6 +182,16 @@ spec:
           env:
             - name: PORT
               value: "50051"
+          livelinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:50051" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:50051" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
@@ -147,6 +211,7 @@ kind: Deployment
 metadata:
   name: currencyservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: currencyservice
@@ -160,6 +225,16 @@ spec:
           image: gcr.io/google-samples/microservices-demo/currencyservice:v0.2.3
           ports:
             - containerPort: 7000
+          livelinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:7000" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:7000" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
@@ -179,6 +254,7 @@ kind: Deployment
 metadata:
   name: shippingservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: shippingservice
@@ -195,6 +271,16 @@ spec:
           env:
             - name: PORT
               value: "50051"
+          livelinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:50051" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:50051" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
@@ -215,6 +301,7 @@ kind: Deployment
 metadata:
   name: adservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: adservice
@@ -231,6 +318,23 @@ spec:
           env:
             - name: PORT
               value: "9555"
+          resources:
+            limits:
+              cpu: 300m
+              memory: 300Mi
+            requests:
+              cpu: 200m
+              memory: 180Mi
+          livenessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:9555" ]
+          readinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:9555" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
@@ -251,6 +355,7 @@ kind: Deployment
 metadata:
   name: cartservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: cartservice
@@ -271,6 +376,16 @@ spec:
               value: "redis-cart:6379"
             - name: CURRENCY_SERVICE_ADDR
               value: "currencyservice:7000"
+          livelinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:7070" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:7070" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
 
 ---
 apiVersion: v1
@@ -292,6 +407,7 @@ kind: Deployment
 metadata:
   name: redis-cart
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: redis-cart
@@ -303,6 +419,24 @@ spec:
       containers:
         - name: service
           image: redis:alpine
+          resources:
+            limits:
+              cpu: 125m
+              memory: 300Mi
+            requests:
+              cpu: 70m
+              memory: 200Mi
+          livelinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              tcpSocket:
+                port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 5
           ports:
             - containerPort: 6379
           volumeMounts:
@@ -339,11 +473,22 @@ spec:
       labels:
         app: checkoutservice
     spec:
+      replicas: 2
       containers:
         - name: service
           image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.2.3
           ports:
             - containerPort: 5050
+          livelinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:5050" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:5050" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
           env:
             - name: PORT
               value: "5050"
@@ -380,6 +525,7 @@ kind: Deployment
 metadata:
   name: frontend
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: frontend
@@ -393,6 +539,16 @@ spec:
           image: gcr.io/google-samples/microservices-demo/frontend:v0.2.3
           ports:
             - containerPort: 8080
+          livelinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
+            initialDelaySeconds: 5
+            periodSeconds: 5
           env:
             - name: port
               value: "8080"
@@ -419,12 +575,11 @@ kind: Service
 metadata:
   name: frontend
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: frontend
   ports:
     - protocol: TCP
       port: 80
       targetPort: 8080
-      nodePort: 30007
 
