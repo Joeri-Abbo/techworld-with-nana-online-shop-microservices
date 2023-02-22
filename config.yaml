@@ -27,11 +27,6 @@ spec:
               value: "1"
             - name: DISABLE_DEBUGGER
               value: "1"
-          livelinessProbe:
-            exec:
-              command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             exec:
               command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
@@ -42,8 +37,9 @@ spec:
               cpu: 100m
               memory: 128Mi
             requests:
-              cpu: 200m
+              cpu: 100m
               memory: 128Mi
+
 ---
 apiVersion: v1
 kind: Service
@@ -88,11 +84,6 @@ spec:
               value: "1"
             - name: PRODUCT_CATALOG_SERVICE_ADDR
               value: "productcatalogservice:3550"
-          livelinessProbe:
-            exec:
-              command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             exec:
               command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
@@ -134,12 +125,6 @@ spec:
           env:
             - name: PORT
               value: "3550"
-          livelinessProbe:
-            httpGet:
-              path: /health
-              port: 3550
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             exec:
               command: [ "/bin/grpc_health_probe", "-addr=:3550" ]
@@ -182,11 +167,6 @@ spec:
           env:
             - name: PORT
               value: "50051"
-          livelinessProbe:
-            exec:
-              command: [ "/bin/grpc_health_probe", "-addr=:50051" ]
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             exec:
               command: [ "/bin/grpc_health_probe", "-addr=:50051" ]
@@ -223,13 +203,11 @@ spec:
       containers:
         - name: service
           image: gcr.io/google-samples/microservices-demo/currencyservice:v0.2.3
+          env:
+            - name: PORT
+              value: "7000"
           ports:
             - containerPort: 7000
-          livelinessProbe:
-            exec:
-              command: [ "/bin/grpc_health_probe", "-addr=:7000" ]
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             exec:
               command: [ "/bin/grpc_health_probe", "-addr=:7000" ]
@@ -271,11 +249,6 @@ spec:
           env:
             - name: PORT
               value: "50051"
-          livelinessProbe:
-            exec:
-              command: [ "/bin/grpc_health_probe", "-addr=:50051" ]
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             exec:
               command: [ "/bin/grpc_health_probe", "-addr=:50051" ]
@@ -376,11 +349,6 @@ spec:
               value: "redis-cart:6379"
             - name: CURRENCY_SERVICE_ADDR
               value: "currencyservice:7000"
-          livelinessProbe:
-            exec:
-              command: [ "/bin/grpc_health_probe", "-addr=:7070" ]
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             exec:
               command: [ "/bin/grpc_health_probe", "-addr=:7070" ]
@@ -426,15 +394,10 @@ spec:
             requests:
               cpu: 70m
               memory: 200Mi
-          livelinessProbe:
+
+          readinessProbe:
             tcpSocket:
               port: 6379
-            initialDelaySeconds: 5
-            periodSeconds: 5
-          readinessProbe:
-            exec:
-              tcpSocket:
-                port: 6379
             initialDelaySeconds: 5
             periodSeconds: 5
           ports:
@@ -473,17 +436,11 @@ spec:
       labels:
         app: checkoutservice
     spec:
-      replicas: 2
       containers:
         - name: service
           image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.2.3
           ports:
             - containerPort: 5050
-          livelinessProbe:
-            exec:
-              command: [ "/bin/grpc_health_probe", "-addr=:5050" ]
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             exec:
               command: [ "/bin/grpc_health_probe", "-addr=:5050" ]
@@ -504,6 +461,7 @@ spec:
               value: "currencyservice:7000"
             - name: CART_SERVICE_ADDR
               value: "cartservice:7070"
+  replicas: 2
 
 ---
 apiVersion: v1
@@ -539,11 +497,6 @@ spec:
           image: gcr.io/google-samples/microservices-demo/frontend:v0.2.3
           ports:
             - containerPort: 8080
-          livelinessProbe:
-            exec:
-              command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             exec:
               command: [ "/bin/grpc_health_probe", "-addr=:8080" ]
